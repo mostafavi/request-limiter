@@ -2,12 +2,18 @@ const http = require("http");
 const express = require('express')
 const app = express()
 
-const limitter = require('./middleware/request-limiter/request-limiter')
+const RequestLimitter = require('./middleware/request-limiter/request-limiter')
 
+let rl = new RequestLimitter()
+
+rl.initialize({
+    timeWindow: 15,
+    maxRequestThreshold: 5
+})
 
 app.set('trust proxy', true)
 
-app.use(limitter)
+app.use(rl.limit)
 
 app.get('/', function (req, res) {
     res.send('Hello World')
