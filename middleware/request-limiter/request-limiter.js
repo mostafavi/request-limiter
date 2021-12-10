@@ -5,24 +5,60 @@
 
 class RequestLimitter {
     constructor() {
-        this.options = {
-            // Set time window to 1 hour as default
-            timeWindow: 60 * 60,
+        let hourToSeconds = 60 * 60
+        let minuteToMiliseconds = 60 * 1000
 
-            // Set max request to 500 per time window as default 
-            maxRequestThreshold: 500,
+        // Initializer flag, it will be true if initializer function correctly load parameters
+        this.isInitialized = false
 
-            // Set garbage collection schedule to every one minute 
-            scheduledGarbageCollecting: 60 * 1000
+        // Weights Table
+        this.weightsTable = []
+
+        // Predefined load patterns
+        this.load = {
+            // 100 Request Per Hour
+            LOW: { timeWindow: hourToSeconds, maxRequestThreshold: 100, scheduledGarbageCollecting: minuteToMiliseconds * 2 },
+            // 500 Request Per Hour 
+            MEDIUM: { timeWindow: hourToSeconds, maxRequestThreshold: 500, scheduledGarbageCollecting: minuteToMiliseconds },
+            // 1000 Request Per Hour
+            HIGH: { timeWindow: hourToSeconds, maxRequestThreshold: 1000, scheduledGarbageCollecting: minuteToMiliseconds * 0.5 }
         }
+
+        this.options = Object.create(null)
+
         // In memory refrence
         this.ipTable = []
+
+        // Garbage Collector Refrence
+        this.garbageCollectorRefrence = Object.create(null)
+    }
+
+    // Initialize the parameters
+    initialize = (options) => {
+        this.options.timeWindow = options.timeWindow ? options.timeWindow : this.options.timeWindow
+        this.options.maxRequestThreshold = options.maxRequestThreshold ? options.maxRequestThreshold : this.options.maxRequestThreshold
+        this.options.scheduledGarbageCollecting = options.scheduledGarbageCollecting ? options.scheduledGarbageCollecting : this.options.scheduledGarbageCollecting
+
+        // run garbage collector
+        this.garbageCollectorRefrence = setInterval(this.garbageCollector, this.options.scheduledGarbageCollecting)
+        this.isInitialized = true
+    }
+
+    setWeight = (endpoint, weight) => {
+        this.weightsTable[endpoint] = weight
+    }
+    getWeight = (endpoint) => {
+        if (typeof (this.weightsTable[endpoint]) == 'number') {
+            return parseInt(this.weightsTable[endpoint])
+        } else {
+            return 1
+        }
     }
 
     // Check maximum request threshold
     checkMaxThreshold = (key) => {
         if (this.ipTable[key]) {
-            if (this.ipTable[key].numberOfRequests < this.options.maxRequestThreshold) {
+            if (this.ipTable[key].numberOfRequests <= this.options.maxRequestThreshold) {
                 return true
             } else {
                 return false
@@ -33,7 +69,7 @@ class RequestLimitter {
     }
 
     // Store in memory
-    storeInMemory = (key) => {
+    storeInMemory = (key, weight) => {
         // Current UNIX time in seconds
         let now = Math.round(Date.now() / 1000)
 
@@ -50,7 +86,7 @@ class RequestLimitter {
 
             // check TTL and create new TTL if it passed
             if (TTL > 0) {
-                this.ipTable[key].numberOfRequests++
+                this.ipTable[key].numberOfRequests += weight
             } else {
                 this.ipTable[key] = {
                     openedTimeWindow: now,
@@ -86,30 +122,34 @@ class RequestLimitter {
         }
     }
 
-    // Initialize the parameters
-    initialize = (options) => {
-        this.options.timeWindow = options.timeWindow ? options.timeWindow : this.options.timeWindow
-        this.options.maxRequestThreshold = options.maxRequestThreshold ? options.maxRequestThreshold : this.options.maxRequestThreshold
-        this.options.scheduledGarbageCollecting = options.scheduledGarbageCollecting ? options.scheduledGarbageCollecting : this.options.scheduledGarbageCollecting
 
-        // run garbage collector
-        setInterval(this.garbageCollector, this.options.scheduledGarbageCollecting)
+
+    // Stop the garbage collection timer
+    stopGarbageCollector = () => {
+        clearInterval(this.garbageCollectorRefrence);
     }
 
-    // Initialize middleware function
+    // Express middleware function
     limit = (req, res, next) => {
-        let key = req.ip
-        let cooldown = this.storeInMemory(key)
-
-        if (this.checkMaxThreshold(key)) {
-            next()
+        if (this.isInitialized) {
+            let url = req.originalUrl
+            let key = req.ip
+            let cooldown = this.storeInMemory(key, this.getWeight(url))
+            if (this.checkMaxThreshold(key)) {
+                next()
+            } else {
+                let err = {
+                    message: "Too many requests",
+                    retryAfter: cooldown
+                }
+                res.header("Retry-After", cooldown)
+                res.status(429).json(err)
+            }
         } else {
             let err = {
-                message: "Too many requests",
-                retryAfter: cooldown
+                message: "Limiter not initialized"
             }
-            res.header("Retry-After", cooldown)
-            res.status(429).json(err)
+            res.status(500).json(err)
         }
     }
 
