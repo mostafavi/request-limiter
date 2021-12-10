@@ -5,8 +5,9 @@
 
 class RequestLimitter {
     constructor() {
-        let hourToSeconds = 60 * 60
-        let minuteToMiliseconds = 60 * 1000
+        // Some convertions
+        const hourToSeconds = 60 * 60
+        const minuteToMiliseconds = 60 * 1000
 
         // Initializer flag, it will be true if initializer function correctly load parameters
         this.isInitialized = false
@@ -111,10 +112,12 @@ class RequestLimitter {
             return TTL
         }
     }
+
     // Reset table data
     resetTable = () => {
         this.ipTable = []
     }
+
     // Delete unused keys from memory
     garbageCollector = () => {
         // Current UNIX time in seconds
