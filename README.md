@@ -6,8 +6,8 @@ Request Limiter
 
 - [Installation](#installation)
   - [Docker](#docker)
-  - [Run localy](#build-locally)
-  - [Test] (#test)
+  - [Run localy](#run-locally)
+  - [Test unit] (#test-unit)
   - [Change configurations](#change-configurations)
   - [Current example] (#current-example)
 - [Project structure](#project-structure)
@@ -37,7 +37,7 @@ $ docker build . -t node-limiter
 $ docker run -p 4000:4000 -d node-limiter
 ```
 
-### Build locally
+### Run locally
 
 1. In project root folder run command below to download all dependencies:
 
@@ -51,7 +51,7 @@ $ npm install
 $ node index.js
 ```
 
-### Test
+### Test unit
 
 Test module writen by jest and We can test project by
 
