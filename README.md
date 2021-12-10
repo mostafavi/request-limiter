@@ -125,8 +125,7 @@ All routes are open to send request in example we define 4 routes
 ### Requests
 
 Pushs events to API \
-Method: **GET** \
-Route: **/** \
+Method: **GET**
 
 CURL example:
 
