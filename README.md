@@ -6,14 +6,13 @@ Request Limiter
 
 - [Installation](#installation)
   - [Docker](#docker)
-  - [Run localy](#run-locally)
-  - [Test unit] (#test-unit)
+  - [Run localy](#run-localy)
+  - [Testing](#testing)
   - [Change configurations](#change-configurations)
-  - [Current example] (#current-example)
+  - [Current example](#current-example)
 - [Project structure](#project-structure)
 - [API Endpoint](#api-endpoint)
-  - [Events](#events)
-    - [Movement Type Descriptions](#movement-type-descriptions)
+  - [Requests](#requests)
 
 ## Installation
 
@@ -37,7 +36,7 @@ $ docker build . -t node-limiter
 $ docker run -p 4000:4000 -d node-limiter
 ```
 
-### Run locally
+### Run localy
 
 1. In project root folder run command below to download all dependencies:
 
@@ -51,7 +50,7 @@ $ npm install
 $ node index.js
 ```
 
-### Test unit
+### Testing
 
 Test module writen by jest and We can test project by
 
@@ -123,7 +122,7 @@ All routes are open to send request in example we define 4 routes
 2. /2 with 2 points weight
 3. /5 with 5 points weight
 
-### Request
+### Requests
 
 Pushs events to API \
 Method: **GET** \
