@@ -58,6 +58,22 @@ Test module writen by jest and We can test project by
 $ npm run test
 ```
 
+The test result should be like this
+
+```
+ PASS  middleware/request-limiter/request-limiter.test.js
+  √ Send new request and check the status (1 ms)
+  √ Send normal request and check the functionality
+  √ Weight test on endpoints
+  √ Send maximum request and check the functionality
+
+Test Suites: 1 passed, 1 total
+Tests:       4 passed, 4 total
+Snapshots:   0 total
+Time:        0.587 s, estimated 1 s
+Ran all test suites.
+```
+
 ### Change configurations
 
 Using env variables you can change the settings, The default port is 4000.

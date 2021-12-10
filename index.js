@@ -14,7 +14,7 @@ let rl = new RequestLimitter()
 app.set('trust proxy', true)
 
 // load env vars
-let port = process.env.PORT || 3000
+let port = process.env.PORT || 4000
 let load = process.env.LOAD || 'LOW' // LOW: 100 MEDIUM: 500 HIGH: 1000  request per hour
 let host = process.env.HOST || '0.0.0.0' // Host IP
 

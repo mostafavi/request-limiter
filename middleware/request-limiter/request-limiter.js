@@ -24,17 +24,22 @@ class RequestLimitter {
             HIGH: { timeWindow: hourToSeconds, maxRequestThreshold: 1000, scheduledGarbageCollecting: minuteToMiliseconds * 0.5 }
         }
 
+        // Create options
         this.options = Object.create(null)
+
+        // Garbage Collector Refrence
+        this.garbageCollectorRefrence = Object.create(null)
 
         // In memory refrence
         this.ipTable = []
 
-        // Garbage Collector Refrence
-        this.garbageCollectorRefrence = Object.create(null)
+
     }
 
     // Initialize the parameters
     initialize = (options) => {
+
+        // load options
         this.options.timeWindow = options.timeWindow ? options.timeWindow : this.options.timeWindow
         this.options.maxRequestThreshold = options.maxRequestThreshold ? options.maxRequestThreshold : this.options.maxRequestThreshold
         this.options.scheduledGarbageCollecting = options.scheduledGarbageCollecting ? options.scheduledGarbageCollecting : this.options.scheduledGarbageCollecting
@@ -44,9 +49,12 @@ class RequestLimitter {
         this.isInitialized = true
     }
 
+    // Set weight for end points
     setWeight = (endpoint, weight) => {
         this.weightsTable[endpoint] = weight
     }
+
+    // Get weight for end points
     getWeight = (endpoint) => {
         if (typeof (this.weightsTable[endpoint]) == 'number') {
             return parseInt(this.weightsTable[endpoint])
@@ -82,6 +90,7 @@ class RequestLimitter {
             // Time that passed from creation of key
             let passedTime = now - this.ipTable[key].openedTimeWindow
 
+            // Calculate Time To Live
             TTL = this.options.timeWindow - passedTime
 
             // check TTL and create new TTL if it passed
@@ -93,9 +102,7 @@ class RequestLimitter {
                     numberOfRequests: 1
                 }
             }
-
             return TTL
-
         } else {
             this.ipTable[key] = {
                 openedTimeWindow: now,
